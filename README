@@ -1,0 +1,14 @@
+****************
+REMITTANCE FLOWS
+****************
+Author: Roxana Torre - www.torre.nl
+
+A visualization of remittance flows based on d3.js chord layout. 
+Note that the original d3.js file has been modified to fit the requirements.
+
+The visualization can be found at www.torre.nl/remittances.
+
+Data
+"Bilateral remittance estimates using migrant stocks, destination country incomes, and source country incomes" (World Bank) which can be downloaded here: http://go.worldbank.org/JITC7NYTT0
+
+

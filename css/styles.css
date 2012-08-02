@@ -1,0 +1,150 @@
+body {
+  font: 12px helvetica, arial, sans-serif;
+}
+/*page elements*/
+#chart{
+	position: absolute;
+}
+
+#description{
+	border-top: 2px dotted #ccc;
+	padding:10px 0;
+	height:auto;
+}
+h1{
+	font-family: Armata, sans-serif;
+	padding-top:30px;
+	padding-bottom: 0px;
+}
+.toggleButton{
+	text-align: right;
+	font-size: 14px;
+	font-family: Armata, sans-serif;
+	padding-bottom: 4px;
+}
+.colborder{
+	border-right:1px dotted #ccc;	
+}
+
+/*visualization*/
+.chords{
+	fill: #aaa;
+}
+
+.arc {
+   opacity: .6;
+}
+.arc.target {
+	fill-opacity: 1;
+	opacity: 1;
+	cursor:pointer;
+}
+
+g.node text{
+	fill:#aaa;
+	font-weight: normal;
+	font-size: 10px;
+	cursor: pointer;
+}
+
+g.node text:hover, g.node text.selected { 
+	fill: #000; 
+	font-size: 12px; 
+	font-weight: bold;
+} 
+ 
+.link { 
+	fill: #f5f5f5; 
+	stroke: #ddd; 
+	/*pointer-events: none;*/ 
+	stroke-width:.2;
+} 
+
+.link.source {
+	stroke-width: 2; 
+	/*opacity:0.7*/ 
+	stroke-opacity:.5;
+	cursor:pointer;
+}
+
+.selectedLink{
+	fill: #727272;
+	stroke:#727272;
+	z-index:100;
+}
+
+
+.node.target text{ 
+	fill: #000000 !important; 
+	font-weight: bold;
+} 
+
+
+/*menu*/
+
+#menu .active{
+	color: red;
+}
+
+#menu {
+	font-family: Armata, sans-serif;
+	border-top: 2px dotted #ccc;
+	padding:20px 0;
+	font-size:20px;
+
+}
+
+a:link, a:visited {
+	text-decoration:none;
+	color:grey;
+}
+a:hover{
+	color:red;
+}
+
+
+/*tooltip*/
+
+div.tooltip {
+    position: absolute;
+    width: auto;
+    height: auto;
+    padding: 6px;
+    font-size: 15px;
+    background: #dbdbdb;
+    color: black;
+    border: solid 1px #727272;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -mozilla-border-radius: 4px;
+    text-align: left;
+	opacity: .9;
+    z-index: 1200;
+	visibility:hidden;
+}
+div.infoPanel {
+	background-color: white;
+	opacity: .7;
+	position:fixed;
+	width: 230px;
+    height: 150px;
+	bottom: 0px;
+	right: 0px;
+	z-index: 1000;
+	padding: 10px;
+	/*border: solid 1px #727272;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -mozilla-border-radius: 4px;*/
+	
+}
+div.legendaContinent{
+	position:absolute;
+	width:220px;
+	top: 70px;
+	left:10px;
+}
+div.countryInfo{
+	font-size: 15px;
+	color:black;
+}
