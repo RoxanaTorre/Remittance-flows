@@ -2,6 +2,14 @@ body {
   font: 12px helvetica, arial, sans-serif;
 }
 /*page elements*/
+
+#browser_message{
+	text-align: center;
+	font-size: 20px;
+	font-weight: bold;
+	display:none;
+}
+
 #chart{
 	position: absolute;
 }
@@ -32,11 +40,11 @@ h1{
 }
 
 .arc {
-   opacity: .6;
+    fill-opacity: .6;
+    stroke-opacity:.6;
 }
 .arc.target {
 	fill-opacity: 1;
-	opacity: 1;
 	cursor:pointer;
 }
 
@@ -54,15 +62,11 @@ g.node text:hover, g.node text.selected {
 } 
  
 .link { 
-	fill: #f5f5f5; 
-	stroke: #ddd; 
-	/*pointer-events: none;*/ 
-	stroke-width:.2;
+	stroke-width:.1;
 } 
 
 .link.source {
-	stroke-width: 2; 
-	/*opacity:0.7*/ 
+	stroke-width: 1; 
 	stroke-opacity:.5;
 	cursor:pointer;
 }
@@ -83,7 +87,7 @@ g.node text:hover, g.node text.selected {
 /*menu*/
 
 #menu .active{
-	color: red;
+	color: #ec5a2c;
 }
 
 #menu {
@@ -93,13 +97,12 @@ g.node text:hover, g.node text.selected {
 	font-size:20px;
 
 }
-
 a:link, a:visited {
 	text-decoration:none;
 	color:grey;
 }
 a:hover{
-	color:red;
+	color:#ec5a2c;
 }
 
 
@@ -111,7 +114,7 @@ div.tooltip {
     height: auto;
     padding: 6px;
     font-size: 15px;
-    background: #dbdbdb;
+    background: #f5f5f5;
     color: black;
     border: solid 1px #727272;
     border-radius: 4px;
@@ -122,29 +125,44 @@ div.tooltip {
     z-index: 1200;
 	visibility:hidden;
 }
-div.infoPanel {
-	background-color: white;
-	opacity: .7;
+
+div.legendaContinent{
+	background: #f5f5f5;
+	opacity: .9;
 	position:fixed;
-	width: 230px;
-    height: 150px;
-	bottom: 0px;
-	right: 0px;
+	width: 200px;
+    height: 70px;
+	bottom: 40px;
+	right: 40px;
 	z-index: 1000;
 	padding: 10px;
-	/*border: solid 1px #727272;
-    border-radius: 4px;
-    -webkit-border-radius: 4px;
-    -mozilla-border-radius: 4px;*/
-	
-}
-div.legendaContinent{
-	position:absolute;
-	width:220px;
-	top: 70px;
-	left:10px;
 }
 div.countryInfo{
+	background: #f5f5f5;
+	opacity: .9;
 	font-size: 15px;
 	color:black;
+	position:fixed;
+	width: 200px;
+    height: 70px;
+	bottom: 140px;
+	right: 40px;
+	z-index: 1000;
+	padding: 10px;
+	visibility:hidden;
+}
+div.showAll{
+	visibility: hidden;
+	width:100px;
+	font-size: 15px;
+	text-align: right;
+	padding:20px;
+	cursor:pointer;
+	position:fixed;
+	right: 30px;
+	top:130px;
+	z-index: 1000;
+}
+div.showAll:hover{
+	color: #ec5a2c;
 }

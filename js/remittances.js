@@ -1,9 +1,11 @@
+
 if ( $(window).width() < 1200){
 	var visWidth = 1000;
 	var leftPosition = 0;
 }
 else { 
 	var visWidth = $(window).width() * .75;
+	//var visWidth = $(window).height();
 	var leftPosition = $(window).width()/2-visWidth/2;
 }
 
@@ -33,6 +35,8 @@ var continentColors = {'Africa':'#E55722','Americas':'#8CBF42','Asia':'#FFBE0B',
 var tooltipdiv = d3.select("body")
     .append("div")
     .attr("class", "tooltip");  
+    
+var showAll = d3.select(".showAll").on('click',showAll);
 
 var indexByName = {},
   nameByIndex = {},
@@ -51,11 +55,11 @@ var indexByName = {},
 var activeIndex = 'sent';
     
 
-d3.text("country_continents_comma.csv", function(imports){
+d3.text("country_continents_2012.csv", function(imports){
 	country_regions = d3.csv.parse(imports);
 });
 
-d3.text("remittances_2010_comma_1.csv", function(imports) {
+d3.text("remittances_2012.csv", function(imports) {
 	var csv_values = d3.csv.parseRows(imports);
 	
 // reading data
@@ -66,14 +70,17 @@ d3.text("remittances_2010_comma_1.csv", function(imports) {
 		indexByName[name] = i-1;
 		for (var j = 1 ; j < csv_values[i].length; j ++){
 			if (!csv_values[i][j]) csv_values[i][j] = 0;
-			matrix[i-1][j-1] = parseFloat(csv_values[i][j]);
+			var value = csv_values[i][j].toString().replace(',','');
+			matrix[i-1][j-1] = parseFloat(value);
 		}
 	}
 	
 //sorting matrix according to continent name
+
 	var k = 0;
 	// first find out new index
 	for (var j = 0; j< country_regions.length; j++){
+		//var found = false;
 		for (var i = 0; i< matrix.length; i++){	
 			if (country_regions[j].country == nameByIndex[i]){
 				newIndex.push(i);
@@ -81,8 +88,10 @@ d3.text("remittances_2010_comma_1.csv", function(imports) {
 				sortedNameByIndex[k] = country_regions[j].country;
 				colorByIndex[k] = continentColors[country_regions[j].continent];
 				k ++;
+				//found = true;			
 			};
 		};
+		//if (!found) console.log ("not found ", country_regions[j].country);
 	};
 //creating rearranged matrix
 	for (var i = 0; i< matrix.length; i++){	
@@ -104,36 +113,38 @@ d3.text("remittances_2010_comma_1.csv", function(imports) {
 			transposedMatrix[i][j] = sortedMatrix[j][i];
 			sortedReceivedTotals[i] += sortedMatrix[j][i];
 		};
+		//if (sortedSentTotals[i] === 0 && sortedReceivedTotals[i] === 0) console.log(sortedNameByIndex[i]); //countries with 0 sent and received remittances are manually removed from the csv file
 	};	 
 	
-	chord.matrix(sortedMatrix);
-	createVis();
+	createVis(sortedMatrix);
 	
 
 //menu items: switch between sent/received
 	d3.select("#sent").on("click", function(){
-		d3.select("#received").classed('active',false)
-		d3.select(this).classed('active',true)
-		d3.select(".infoPanel .countryInfo").html("");
+		showAll.style("visibility", "hidden");
+		d3.select("#received").classed('active',false);
+		d3.select(this).classed('active',true);
+		d3.select(".countryInfo").style("visibility","hidden");
 		activeIndex = 'sent';
-		chord.matrix(sortedMatrix);
-		createVis();
+		createVis(sortedMatrix);
 	});
 	d3.select("#received").on("click", function(){
-		d3.select("#sent").classed('active',false)
-		d3.select(this).classed('active',true)
-		d3.select(".infoPanel .countryInfo").html("");
+		showAll.style("visibility", "hidden");
+		d3.select("#sent").classed('active',false);
+		d3.select(this).classed('active',true);
+		d3.select(".countryInfo").style("visibility","hidden");
 		activeIndex = 'received';
-		chord.matrix(transposedMatrix);
-		createVis();
+		createVis(transposedMatrix);
 	});
 });
 
-function createVis() {
+function createVis(matrix) {
+	chord.matrix(matrix)
+
 	d3.selectAll('g.group').remove();
 	d3.selectAll('g.node').remove();
 	d3.selectAll("path.link").remove();
-	
+
 	var g = svg.selectAll("g.group")
 	  .data(chord.groups)
 	 .enter().append("g")
@@ -145,10 +156,8 @@ function createVis() {
 	  .style("stroke", function(d) { return colorByIndex[d.index]; })
 	  .attr("id", function(d) { return "arc-" + d.index; })
 	  .attr("d", arc)
-	
-	svg.selectAll("g.node")//nodes with country names
-	  .data(chord.groups)
-	.enter().append("svg:g")
+
+	g.append("svg:g")
 	  .attr("class", "node")
 	  .attr("id", function(d) { return "node-" + d.index; })
 	  .append("svg:text")
@@ -163,53 +172,71 @@ function createVis() {
 	  .text(function(d) { return sortedNameByIndex[d.index]; })
 	  .on("click", highlight);
 
+	var background_paths = svg.append("g");
+
 	var path = svg.selectAll("path.link") //lines between countries
 		.data(chord.chords)
 	  .enter().append("svg:path")
+	  	.each(function(d){d._color = colorByIndex[d.target.index]})
 		.attr("class", function(d) { return "link source-" + d.source.index + " target-" + d.target.index; })
-		.attr("d",d3.svg.chord().radius(r0));
-
+		.attr("d",d3.svg.chord().radius(r0))
+		.style("fill", function(d){ return d._color; })
+      	.style("stroke", function(d){ return d._color; })
 };
 
 function highlight(d) {
-  reset();
-  if (activeIndex =='received') d3.select(".infoPanel .countryInfo").html("<strong>"+ sortedNameByIndex[d.index]+"</strong>"+ '<br />Received: '+ sortedReceivedTotals[d.index]  +' million USD<br />Sent: '+sortedSentTotals[d.index]+' million USD');
-  else d3.select(".infoPanel .countryInfo").html("<strong>"+ sortedNameByIndex[d.index]+"</strong>"+ '<br />Sent: '+sortedSentTotals[d.index] + ' million USD<br />Received: '+sortedReceivedTotals[d.index]+' million USD');
+	reset();
+	d3.select(".showAll").style("visibility","visible");
+	if (activeIndex =='received') d3.select(".countryInfo").style("visibility","visible") .html("<strong>"+ sortedNameByIndex[d.index]+"</strong>"+ '<br />Received: '+ sortedReceivedTotals[d.index]  +' million USD<br />Sent: '+sortedSentTotals[d.index]+' million USD');
+	else d3.select(".countryInfo").style("visibility","visible") .html("<strong>"+ sortedNameByIndex[d.index]+"</strong>"+ '<br />Sent: '+sortedSentTotals[d.index] + ' million USD<br />Received: '+sortedReceivedTotals[d.index]+' million USD');
 
-  d3.select(this).classed("selected",true);
-  svg.selectAll("path.link.source-" + d.index)
-      .classed("source", true)
-      .style("fill", function(d){ return colorByIndex[d.target.index]; })
-      .style("stroke", function(d){ return colorByIndex[d.target.index]; })
-      .on("mouseover", mouseover)
-      .on("mouseout", mouseout)
-      .each(updateNodes("target", true));
+	d3.select(this).classed("selected",true);
+	svg.selectAll("path.link.source-" + d.index)
+		.classed("source", true)
+		.style("visibility","visible")     
+		.on("mouseover", mouseover)
+		.on("mouseout", mouseout)
+		.each(updateNodes("target", true));
 }
 
 function mouseover(d){ //for links between countries
-	d3.select(this).style("fill","#727272").style("stroke","#727272").style("z-index", 100);
+	d3.select(this).classed("selectedLink",true);
 	showTooltip(sortedNameByIndex[d.source.index],sortedNameByIndex[d.target.index],d.source.value); 
 }
 
 function mouseout(d){
-	d3.select(this).style("fill", colorByIndex[d.target.index]).style("stroke",colorByIndex[d.target.index]);
+	d3.select(this).style("fill", d._color).style("stroke",d._color);
 	d3.select(this).classed("selectedLink",false);
 	tooltipdiv.style("visibility", "hidden");
 }
 
 function reset(){
-	//console.log("in reset");
 	svg.selectAll("g.node text")
  	 	.classed("selected", false);
 
 	svg.selectAll("path.link")
 		.classed("source", false)
-		.style("fill", "#f5f5f5")
-		.style("stroke", "#ddd")
+		.style("visibility","hidden")
 		.on("mouseover", null)
 		.on("mouseout", null)
 		.each(updateNodes("target", false));
 	
+	tooltipdiv.style("visibility", "hidden");
+}
+
+function showAll(){
+	svg.selectAll("g.node text")
+ 	 	.classed("selected", false);
+
+	svg.selectAll("path.link")
+		.classed("source", false)
+		.style("visibility","visible")
+		.on("mouseover", null)
+		.on("mouseout", null)
+		.each(updateNodes("target", false));
+
+	d3.select(".countryInfo").style("visibility","hidden");
+	showAll.style("visibility", "hidden");
 	tooltipdiv.style("visibility", "hidden");
 }
 

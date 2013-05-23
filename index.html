@@ -6,6 +6,7 @@
     <link href='http://fonts.googleapis.com/css?family=Armata' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="js/d3-modified.v2.js"></script>
     <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+
 	<link rel="stylesheet" href="css/screen.css" type="text/css" media="screen, projection" />
     <link type="text/css" rel="stylesheet" href="css/styles.css" />
   </head>
@@ -18,22 +19,24 @@
 		<div class="span-24 last">
 			<div id="description">
 				<div class="span-5 colborder">This visualization shows the global movements of money due to remittances (money sent by migrants to their home country).<br /><br /> 
-				<strong>Note:</strong> The values presented here are only an estimation of the total amount money being sent, as it's not possible to keep track on all money sent in informal ways.<br /><br />
+				<strong>UPDATE:</strong> This version is using the last available dataset (2012).<br /><br /> 
 				Learn more about <a target="_blank" href="http://en.wikipedia.org/wiki/Remittance"> remittances </a>
 				</div>
-				<div class="span-6 colborder"><strong>Interaction</strong><br />
-				Click on a country to see the remittance flows. Two different views are possible: Remittances sent and received, indicating if the selected country will be the one sending or receiving. The width of the country circle arc is proportional to the amount sent or received. Hovering over the lines will show the estimated remittance value between the countries.<br />
+				<div class="span-6 colborder"><strong>INTERACTION</strong><br />
+				<strong>Click on a country</strong> to see the remittance flows. Two different views are possible: Remittances sent and received, indicating if the selected country will be the one sending or receiving. The width of the country circle arc is proportional to the amount sent or received. Hovering over the lines will show the estimated remittance value between the countries.<br />
 				The countries are grouped by continent and within the continent in subregions.
 				<br /><br /> </div>
-				<div class="span-5 colborder"><strong>Details</strong><br />
-				Data used: "Bilateral remittance estimates using migrant stocks, destination country incomes, and source country incomes" (World Bank) which can be downloaded <a target="_blank" href="http://go.worldbank.org/JITC7NYTT0">here</a>.<br />
-				Created using html5/svg/javascript and the <a target="_blank" href="http://d3js.org">D3.js library</a>.<br />
-				See also my project <a target="_blank" href="http://www.torre.nl/mmm">Migrants moving money</a>, a slightly different approach to the same subject.
+				<div class="span-6 colborder"><strong>DETAILS</strong><br />
+				Data used: "Bilateral remittance estimates using migrant stocks, destination country incomes, and source country incomes" for <strong>2012</strong> (World Bank) which can be downloaded <a target="_blank" href="http://go.worldbank.org/JITC7NYTT0">here</a>.<br />
+				<br />
+				Created using html5/svg/javascript and the <a target="_blank" href="http://d3js.org">D3.js library</a>. Based on the <a href="http://mbostock.github.com/d3/ex/chord.html">Chord layout</a> (inspired by Circos).<br />
 				</div>
-				<div class="span-4 last"><strong>Contact</strong><br />
+				<div class="span-3 last"><strong>CONTACT</strong><br />
 				Roxana Torre<br />
 				<a target="_blank" href="http://www.torre.nl">www.torre.nl</a><br />
-				email: roxana(at)torre.nl</div>
+				email: roxana(at)torre.nl<br /><br />
+				<strong>Github</strong><br /> <a target="_blank" href="https://github.com/RoxanaTorre/Remittance-flows">https://github.com/RoxanaTorre/Remittance-flows</a>			
+				</div>				
 			</div>
 		</div>
 		<div class="span-24 last">
@@ -44,24 +47,36 @@
 		</div>
 	</div>
     <div class="tooltip"></div>
-	<div class="infoPanel">
-		<div class="countryInfo"></div>		
-		<div class="legendaContinent">
-			<svg height="200">
-				<text class="continentLabel" dx="30" dy="10">Africa</text>
-				<text class="continentLabel" dx="30" dy="25">Americas</text>
-				<text class="continentLabel" dx="30" dy="40">Asia</text>
-				<text class="continentLabel" dx="30" dy="55">Europe</text>
-				<text class="continentLabel" dx="30" dy="70">Oceania</text>
-				<rect width="20" height="12" x="0" y="0" style="fill:#E55722;" />
-				<rect width="20" height="12" x="0" y="15" style="fill:#8CBF42;" />
-				<rect width="20" height="12" x="0" y="30" style="fill:#FFBE0B;" />
-				<rect width="20" height="12" x="0" y="45" style="fill:#305666;" />
-				<rect width="20" height="12" x="0" y="60" style="fill:#c96fb7;" />	
-			</svg>
-		</div>
+	<div class="showAll">SHOW ALL</div>
+	<div class="countryInfo"></div>	
+	<div class="legendaContinent">
+		<svg>
+			<text class="continentLabel" dx="30" dy="10">Africa</text>
+			<text class="continentLabel" dx="30" dy="25">Americas</text>
+			<text class="continentLabel" dx="30" dy="40">Asia</text>
+			<text class="continentLabel" dx="30" dy="55">Europe</text>
+			<text class="continentLabel" dx="30" dy="70">Oceania</text>
+			<rect width="20" height="12" x="0" y="0" style="fill:#E55722;" />
+			<rect width="20" height="12" x="0" y="15" style="fill:#8CBF42;" />
+			<rect width="20" height="12" x="0" y="30" style="fill:#FFBE0B;" />
+			<rect width="20" height="12" x="0" y="45" style="fill:#305666;" />
+			<rect width="20" height="12" x="0" y="60" style="fill:#c96fb7;" />	
+		</svg>
 	</div>
 	<div id="chart"></div>
-    <script type="text/javascript" src="js/remittances.js"></script>
+	<div id="browser_message">Sorry, the visualization cannot be displayed in your browser,<br /> you need to upgrade your browser to a newer version!</div>
+	<script>
+	$(document).ready(
+	function (){//	alert(' -------> in script');
+		if (!d3.layout) {
+			$('#browser_message').show();
+			$('#menu').hide();
+			$('.infoPanel').hide();
+		}
+	})
+	</script>
+
+	<script type="text/javascript" src="js/remittances.js"></script>
+
   </body>
 </html>
