@@ -1,6 +1,9 @@
 body {
   font: 12px helvetica, arial, sans-serif;
 }
+html{
+	height:1800px;
+}
 /*page elements*/
 
 #browser_message{
@@ -12,6 +15,7 @@ body {
 
 #chart{
 	position: absolute;
+	z-index: 0;
 }
 
 #description{
@@ -83,19 +87,23 @@ g.node text:hover, g.node text.selected {
 	font-weight: bold;
 } 
 
-
+.titles{
+	margin-top:5px;
+	border-top: 2px dotted #ccc;
+	z-index:1000;
+	background: #ffffff;
+	opacity:.9;
+}
 /*menu*/
 
-#menu .active{
+.menu .active{
 	color: #ec5a2c;
 }
 
-#menu {
+.menu {
 	font-family: Armata, sans-serif;
-	border-top: 2px dotted #ccc;
-	padding:20px 0;
-	font-size:20px;
-
+	padding:5px 5px 5px 0;
+	font-size:15px;
 }
 a:link, a:visited {
 	text-decoration:none;
@@ -152,17 +160,23 @@ div.countryInfo{
 	visibility:hidden;
 }
 div.showAll{
+	float:right;
 	visibility: hidden;
 	width:100px;
-	font-size: 15px;
+	font-size: 14px;
 	text-align: right;
-	padding:20px;
+	padding:5px;
 	cursor:pointer;
-	position:fixed;
-	right: 30px;
-	top:130px;
-	z-index: 1000;
 }
 div.showAll:hover{
 	color: #ec5a2c;
+}
+.progressBack{
+	font-size: 20px;
+	top:200px;
+	text-align: center;
+	margin-left:auto;
+	margin-right: auto;
+	display:block;
+	z-index:3000;	
 }

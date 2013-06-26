@@ -4,8 +4,8 @@ if ( $(window).width() < 1200){
 	var leftPosition = 0;
 }
 else { 
-	var visWidth = $(window).width() * .75;
-	//var visWidth = $(window).height();
+	//var visWidth = $(window).width() * .65;
+	var visWidth = $(window).height()* 1.20;
 	var leftPosition = $(window).width()/2-visWidth/2;
 }
 
@@ -53,92 +53,105 @@ var indexByName = {},
   colorByIndex =[];
 
 var activeIndex = 'sent';
-    
+
+//progress
+var width = 960,
+	height = 600,
+	twoPi = 2 * Math.PI,
+	progress = 0,
+	formatPercent = d3.format(".0%");
+
+var progressBack = d3.select("body").append('div').attr('class','progressBack');
+
+//progressBack.append('img').attr('src',"loading.gif");
+progressBack.append('text').text('LOADING');
 
 d3.text("country_continents_2012.csv", function(imports){
 	country_regions = d3.csv.parse(imports);
-});
 
-d3.text("remittances_2012.csv", function(imports) {
-	var csv_values = d3.csv.parseRows(imports);
-	
-// reading data
-	for (var i = 1; i< csv_values.length; i ++){
-		matrix[i-1]=[];
-		var name = csv_values[i][0];
-		nameByIndex[i-1] = name;
-		indexByName[name] = i-1;
-		for (var j = 1 ; j < csv_values[i].length; j ++){
-			if (!csv_values[i][j]) csv_values[i][j] = 0;
-			var value = csv_values[i][j].toString().replace(',','');
-			matrix[i-1][j-1] = parseFloat(value);
+	d3.text("remittances_2012.csv", function(imports) {
+		var csv_values = d3.csv.parseRows(imports);
+
+	// reading data
+		for (var i = 1; i< csv_values.length; i ++){
+			matrix[i-1]=[];
+			var name = csv_values[i][0];
+			nameByIndex[i-1] = name;
+			indexByName[name] = i-1;
+			for (var j = 1 ; j < csv_values[i].length; j ++){
+				if (!csv_values[i][j]) csv_values[i][j] = 0;
+				var value = csv_values[i][j].toString().replace(',','');
+				matrix[i-1][j-1] = parseFloat(value);
+			}
 		}
-	}
+		
+	//sorting matrix according to continent name
 	
-//sorting matrix according to continent name
-
-	var k = 0;
-	// first find out new index
-	for (var j = 0; j< country_regions.length; j++){
-		//var found = false;
+		var k = 0;
+		// first find out new index
+		for (var j = 0; j< country_regions.length; j++){
+			//var found = false;
+			for (var i = 0; i< matrix.length; i++){	
+				if (country_regions[j].country == nameByIndex[i]){
+					newIndex.push(i);
+					sortedIndexByName[country_regions[j].country] = k;
+					sortedNameByIndex[k] = country_regions[j].country;
+					colorByIndex[k] = continentColors[country_regions[j].continent];
+					k ++;
+					//found = true;			
+				};
+			};
+			//if (!found) console.log ("not found ", country_regions[j].country);
+		};
+	//creating rearranged matrix
 		for (var i = 0; i< matrix.length; i++){	
-			if (country_regions[j].country == nameByIndex[i]){
-				newIndex.push(i);
-				sortedIndexByName[country_regions[j].country] = k;
-				sortedNameByIndex[k] = country_regions[j].country;
-				colorByIndex[k] = continentColors[country_regions[j].continent];
-				k ++;
-				//found = true;			
+			sortedMatrix[i] = [];
+			sortedSentTotals[i] = 0;
+			for (var j = 0; j< matrix[i].length; j++){
+				var newI = newIndex[i];
+				var newJ = newIndex[j];
+				sortedMatrix[i][j] = matrix[newI][newJ];
+				sortedSentTotals[i] += matrix[newI][newJ];
 			};
 		};
-		//if (!found) console.log ("not found ", country_regions[j].country);
-	};
-//creating rearranged matrix
-	for (var i = 0; i< matrix.length; i++){	
-		sortedMatrix[i] = [];
-		sortedSentTotals[i] = 0;
-		for (var j = 0; j< matrix[i].length; j++){
-			var newI = newIndex[i];
-			var newJ = newIndex[j];
-			sortedMatrix[i][j] = matrix[newI][newJ];
-			sortedSentTotals[i] += matrix[newI][newJ];
-		};
-	};
-
-//transposing matrix for remittances received and received totals calculation
-	for (var i = 0; i< sortedMatrix.length; i++){	
-		transposedMatrix[i] = [];
-		sortedReceivedTotals[i] = 0;
-		for (var j = 0; j< sortedMatrix[i].length; j++){
-			transposedMatrix[i][j] = sortedMatrix[j][i];
-			sortedReceivedTotals[i] += sortedMatrix[j][i];
-		};
-		//if (sortedSentTotals[i] === 0 && sortedReceivedTotals[i] === 0) console.log(sortedNameByIndex[i]); //countries with 0 sent and received remittances are manually removed from the csv file
-	};	 
 	
-	createVis(sortedMatrix);
+	//transposing matrix for remittances received and received totals calculation
+		for (var i = 0; i< sortedMatrix.length; i++){	
+			transposedMatrix[i] = [];
+			sortedReceivedTotals[i] = 0;
+			for (var j = 0; j< sortedMatrix[i].length; j++){
+				transposedMatrix[i][j] = sortedMatrix[j][i];
+				sortedReceivedTotals[i] += sortedMatrix[j][i];
+			};
+			//if (sortedSentTotals[i] === 0 && sortedReceivedTotals[i] === 0) console.log(sortedNameByIndex[i]); //countries with 0 sent and received remittances are manually removed from the csv file
+		};	 
+		
+	//menu items: switch between sent/received
+		d3.select("#sent").on("click", function(){
+			showAll.style("visibility", "hidden");
+			d3.select("#received").classed('active',false);
+			d3.select(this).classed('active',true);
+			d3.select(".countryInfo").style("visibility","hidden");
+			activeIndex = 'sent';
+			createVis(sortedMatrix);
 	
-
-//menu items: switch between sent/received
-	d3.select("#sent").on("click", function(){
-		showAll.style("visibility", "hidden");
-		d3.select("#received").classed('active',false);
-		d3.select(this).classed('active',true);
-		d3.select(".countryInfo").style("visibility","hidden");
-		activeIndex = 'sent';
-		createVis(sortedMatrix);
-	});
-	d3.select("#received").on("click", function(){
-		showAll.style("visibility", "hidden");
-		d3.select("#sent").classed('active',false);
-		d3.select(this).classed('active',true);
-		d3.select(".countryInfo").style("visibility","hidden");
-		activeIndex = 'received';
-		createVis(transposedMatrix);
+		});
+		d3.select("#received").on("click", function(){
+			showAll.style("visibility", "hidden");
+			d3.select("#sent").classed('active',false);
+			d3.select(this).classed('active',true);
+			d3.select(".countryInfo").style("visibility","hidden");
+			activeIndex = 'received';
+			createVis(transposedMatrix);
+		});
+		
+		createVis(sortedMatrix);		
 	});
 });
-
 function createVis(matrix) {
+	
+	progressBack.style('display','none');
+	
 	chord.matrix(matrix)
 
 	d3.selectAll('g.group').remove();
@@ -172,8 +185,6 @@ function createVis(matrix) {
 	  .text(function(d) { return sortedNameByIndex[d.index]; })
 	  .on("click", highlight);
 
-	var background_paths = svg.append("g");
-
 	var path = svg.selectAll("path.link") //lines between countries
 		.data(chord.chords)
 	  .enter().append("svg:path")
@@ -182,6 +193,9 @@ function createVis(matrix) {
 		.attr("d",d3.svg.chord().radius(r0))
 		.style("fill", function(d){ return d._color; })
       	.style("stroke", function(d){ return d._color; })
+      	
+      	
+      	
 };
 
 function highlight(d) {
